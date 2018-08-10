@@ -21,6 +21,7 @@ package com.swippcoin.cardtastic;
 import com.swippcoin.cardtastic.card.Suit;
 import com.swippcoin.cardtastic.card.Card;
 import com.swippcoin.cardtastic.card.CardNotFoundException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Collections;
@@ -46,7 +47,7 @@ public class Deck {
 		do {
 			/* Reshuffle if needed. Even if the probability of getting new deck order is 52!,
 			   it can technically happen ;) */
-			Collections.shuffle(cards);
+			Collections.shuffle(cards, new SecureRandom());
 		} while (equals(new Deck()));
 	}
 
