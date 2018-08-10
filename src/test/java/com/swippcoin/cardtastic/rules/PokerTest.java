@@ -16,8 +16,11 @@
  *  and GNU Lesser General Public License along with cardtastic.
  *  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.swippcoin.cardtastic;
+package com.swippcoin.cardtastic.rules;
 
+import com.swippcoin.cardtastic.Action;
+import com.swippcoin.cardtastic.Deck;
+import com.swippcoin.cardtastic.Hand;
 import com.swippcoin.cardtastic.card.Face;
 import com.swippcoin.cardtastic.card.Suit;
 import com.swippcoin.cardtastic.card.Card;
@@ -26,7 +29,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
 
-public class RulesTest {
+public class PokerTest {
 	private Deck deck;
 	private Hand hand;
 
@@ -37,37 +40,37 @@ public class RulesTest {
 	}
 
 	@Test
-	public void testIsJacksOrBetter() throws CardNotFoundException {
+	public void testJacksOrBetterIsFound() throws CardNotFoundException {
 		deck.moveToFront(new Card(Suit.SPADES, Face.JACK));
 		deck.moveToFront(new Card(Suit.DIAMONDS, Face.JACK));
 		hand.drawFrom(deck);
-		assertTrue(Rules.isJacksOrBetter(hand));
+		assertTrue(Poker.JACKS_OR_BETTER.isFound(hand));
 
 		hand.setActionAll(Action.THROW);
 		assertEquals(Hand.MAX_CARDS, hand.drawFrom(deck).size());
-		assertFalse(Rules.isJacksOrBetter(hand));
+		assertFalse(Poker.JACKS_OR_BETTER.isFound(hand));
 
 		deck.moveToFront(new Card(Suit.HEARTS, 10));
 		deck.moveToFront(new Card(Suit.DIAMONDS, 10));
 		hand.setActionAll(Action.THROW);
 		hand.drawFrom(deck);
-		assertFalse(Rules.isJacksOrBetter(hand));
+		assertFalse(Poker.JACKS_OR_BETTER.isFound(hand));
 
 		deck.moveToFront(new Card(Suit.HEARTS, 4));
 		deck.moveToFront(new Card(Suit.CLUBS, Face.KING));
 		hand.setActionAll(Action.THROW);
 		hand.drawFrom(deck);
-		assertFalse(Rules.isJacksOrBetter(hand));
+		assertFalse(Poker.JACKS_OR_BETTER.isFound(hand));
 	}
 
 	@Test
-	public void testIsTwoPair() throws CardNotFoundException {
+	public void testTwoPairIsFound() throws CardNotFoundException {
 		deck.moveToFront(new Card(Suit.SPADES, 3));
 		deck.moveToFront(new Card(Suit.DIAMONDS, 3));
 		deck.moveToFront(new Card(Suit.DIAMONDS, Face.KING));
 		deck.moveToFront(new Card(Suit.SPADES, Face.QUEEN));
 		hand.drawFrom(deck);
-		assertFalse(Rules.isTwoPair(hand));
+		assertFalse(Poker.TWO_PAIR.isFound(hand));
 
 		deck.moveToFront(new Card(Suit.SPADES, 9));
 		deck.moveToFront(new Card(Suit.DIAMONDS, 9));
@@ -76,18 +79,18 @@ public class RulesTest {
 		deck.moveToFront(new Card(Suit.SPADES, Face.ACE));
 		hand.setActionAll(Action.THROW);
 		hand.drawFrom(deck);
-		assertTrue(Rules.isTwoPair(hand));
+		assertTrue(Poker.TWO_PAIR.isFound(hand));
 	}
 
 	@Test
-	public void testIsThreeOfAKind() throws CardNotFoundException {
+	public void testThreeOfAKindIsFound() throws CardNotFoundException {
 		deck.moveToFront(new Card(Suit.SPADES, 3));
 		deck.moveToFront(new Card(Suit.DIAMONDS, 3));
 		deck.moveToFront(new Card(Suit.CLUBS, 4));
 		deck.moveToFront(new Card(Suit.CLUBS, 4));
 		deck.moveToFront(new Card(Suit.CLUBS, 3));
 		hand.drawFrom(deck);
-		assertTrue(Rules.isThreeOfAKind(hand));
+		assertTrue(Poker.THREE_OF_A_KIND.isFound(hand));
 
 		deck.moveToFront(new Card(Suit.SPADES, Face.JACK));
 		deck.moveToFront(new Card(Suit.DIAMONDS, Face.KING));
@@ -96,18 +99,18 @@ public class RulesTest {
 		deck.moveToFront(new Card(Suit.CLUBS, Face.ACE));
 		hand.setActionAll(Action.THROW);
 		hand.drawFrom(deck);
-		assertFalse(Rules.isThreeOfAKind(hand));
+		assertFalse(Poker.THREE_OF_A_KIND.isFound(hand));
 	}
 
 	@Test
-	public void testIsStraight() throws CardNotFoundException {
+	public void testStraightIsFound() throws CardNotFoundException {
 		deck.moveToFront(new Card(Suit.SPADES, Face.ACE));
 		deck.moveToFront(new Card(Suit.DIAMONDS, 2));
 		deck.moveToFront(new Card(Suit.CLUBS, 3));
 		deck.moveToFront(new Card(Suit.HEARTS, 4));
 		deck.moveToFront(new Card(Suit.CLUBS, 5));
 		hand.drawFrom(deck);
-		assertTrue(Rules.isStraight(hand));
+		assertTrue(Poker.STRAIGHT.isFound(hand));
 
 		deck.moveToFront(new Card(Suit.DIAMONDS, 9));
 		deck.moveToFront(new Card(Suit.DIAMONDS, 7));
@@ -116,7 +119,7 @@ public class RulesTest {
 		deck.moveToFront(new Card(Suit.CLUBS, Face.ACE));
 		hand.setActionAll(Action.THROW);
 		hand.drawFrom(deck);
-		assertFalse(Rules.isStraight(hand));
+		assertFalse(Poker.STRAIGHT.isFound(hand));
 
 		deck.moveToFront(new Card(Suit.CLUBS, 4));
 		deck.moveToFront(new Card(Suit.CLUBS, 2));
@@ -125,18 +128,18 @@ public class RulesTest {
 		deck.moveToFront(new Card(Suit.HEARTS, 5));
 		hand.setActionAll(Action.THROW);
 		hand.drawFrom(deck);
-		assertTrue(Rules.isStraight(hand));
+		assertTrue(Poker.STRAIGHT.isFound(hand));
 	}
 
 	@Test
-	public void testIsFlush() throws CardNotFoundException {
+	public void testFlushIsFound() throws CardNotFoundException {
 		deck.moveToFront(new Card(Suit.SPADES, Face.ACE));
 		deck.moveToFront(new Card(Suit.DIAMONDS, 3));
 		deck.moveToFront(new Card(Suit.SPADES, 3));
 		deck.moveToFront(new Card(Suit.SPADES, 4));
 		deck.moveToFront(new Card(Suit.SPADES, 5));
 		hand.drawFrom(deck);
-		assertFalse(Rules.isFlush(hand));
+		assertFalse(Poker.FLUSH.isFound(hand));
 
 		deck.moveToFront(new Card(Suit.HEARTS, 2));
 		deck.moveToFront(new Card(Suit.HEARTS, 7));
@@ -145,18 +148,18 @@ public class RulesTest {
 		deck.moveToFront(new Card(Suit.HEARTS, Face.ACE));
 		hand.setActionAll(Action.THROW);
 		hand.drawFrom(deck);
-		assertTrue(Rules.isFlush(hand));
+		assertTrue(Poker.FLUSH.isFound(hand));
 	}
 
 	@Test
-	public void testIsFourOfAKind() throws CardNotFoundException {
+	public void testFourOfAKindIsFound() throws CardNotFoundException {
 		deck.moveToFront(new Card(Suit.SPADES, 3));
 		deck.moveToFront(new Card(Suit.DIAMONDS, 3));
 		deck.moveToFront(new Card(Suit.HEARTS, 3));
 		deck.moveToFront(new Card(Suit.HEARTS, 4));
 		deck.moveToFront(new Card(Suit.CLUBS, 5));
 		hand.drawFrom(deck);
-		assertFalse(Rules.isFourOfAKind(hand));
+		assertFalse(Poker.FOUR_OF_A_KIND.isFound(hand));
 
 		deck.moveToFront(new Card(Suit.SPADES, Face.KING));
 		deck.moveToFront(new Card(Suit.DIAMONDS, Face.KING));
@@ -165,18 +168,18 @@ public class RulesTest {
 		deck.moveToFront(new Card(Suit.CLUBS, Face.KING));
 		hand.setActionAll(Action.THROW);
 		hand.drawFrom(deck);
-		assertTrue(Rules.isFourOfAKind(hand));
+		assertTrue(Poker.FOUR_OF_A_KIND.isFound(hand));
 	}
 
 	@Test
-	public void testIsStraightFlush() throws CardNotFoundException {
+	public void testStraightFlushIsFound() throws CardNotFoundException {
 		deck.moveToFront(new Card(Suit.SPADES, 3));
 		deck.moveToFront(new Card(Suit.DIAMONDS, 4));
 		deck.moveToFront(new Card(Suit.HEARTS, 5));
 		deck.moveToFront(new Card(Suit.HEARTS, 6));
 		deck.moveToFront(new Card(Suit.CLUBS, 7));
 		hand.drawFrom(deck);
-		assertFalse(Rules.isStraightFlush(hand));
+		assertFalse(Poker.STRAIGHT_FLUSH.isFound(hand));
 
 		deck.moveToFront(new Card(Suit.SPADES, 5));
 		deck.moveToFront(new Card(Suit.SPADES, 9));
@@ -185,17 +188,17 @@ public class RulesTest {
 		deck.moveToFront(new Card(Suit.SPADES, 6));
 		hand.setActionAll(Action.THROW);
 		hand.drawFrom(deck);
-		assertTrue(Rules.isStraightFlush(hand));
+		assertTrue(Poker.STRAIGHT_FLUSH.isFound(hand));
 	}
 
-	public void testIsRoyalFlush() throws CardNotFoundException {
+	public void testRoyalFlushIsFound() throws CardNotFoundException {
 		deck.moveToFront(new Card(Suit.SPADES, 5));
 		deck.moveToFront(new Card(Suit.SPADES, 6));
 		deck.moveToFront(new Card(Suit.SPADES, 7));
 		deck.moveToFront(new Card(Suit.SPADES, 8));
 		deck.moveToFront(new Card(Suit.SPADES, 9));
 		hand.drawFrom(deck);
-		assertFalse(Rules.isRoyalFlush(hand));
+		assertFalse(Poker.ROYAL_FLUSH.isFound(hand));
 
 		deck.moveToFront(new Card(Suit.HEARTS, 10));
 		deck.moveToFront(new Card(Suit.HEARTS, Face.KING));
@@ -204,6 +207,6 @@ public class RulesTest {
 		deck.moveToFront(new Card(Suit.HEARTS, Face.QUEEN));
 		hand.setActionAll(Action.THROW);
 		hand.drawFrom(deck);
-		assertTrue(Rules.isRoyalFlush(hand));
+		assertTrue(Poker.ROYAL_FLUSH.isFound(hand));
 	}
 }
