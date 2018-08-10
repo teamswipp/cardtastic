@@ -29,50 +29,73 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum Poker implements Payable, Rule {
-	JACKS_OR_BETTER("Jacks or better") {
+	ROYAL_FLUSH("Royal flush") {
 		@Override
 		public int getReward(int bet) {
-			return bet;
-		}
+			if (bet >= 50) {
+				return bet * 600;
+			}
 
-		@Override
-		public boolean isFound(Hand hand) {
-			return isNumCardsOver(hand, 2, Face.JACK.getValue());
-		}
-	}, TWO_PAIR("Two pair") {
-		@Override
-		public int getReward(int bet) {
-			return bet * 2;
+			return bet * 250;
 		}
 
 		@Override
 		public boolean isFound(Hand hand) {
 			final List<Card> cards = hand.get();
+			final Card lastCard = (Card) cards.get(cards.size() - 1);
 
 			Collections.sort(cards);
-			int previousValue = -1;
-			int pairs = 0;
-
-			for (Card c : cards) {
-				if (c.getValue() == previousValue) {
-					pairs++;
-					previousValue = -1;
-				} else {
-					previousValue = c.getValue();
-				}
-			}
-
-			return pairs == 2;
+			return lastCard.getValue() == Face.ACE.getValue() && Poker.STRAIGHT_FLUSH.isFound(hand);
 		}
-	}, THREE_OF_A_KIND("3 of a kind") {
+	}, STRAIGHT_FLUSH("Straight flush") {
 		@Override
 		public int getReward(int bet) {
-			return bet * 3;
+			return bet * 50;
 		}
 
 		@Override
 		public boolean isFound(Hand hand) {
-			return isNumCardsOver(hand, 3, 2);
+			return Poker.STRAIGHT.isFound(hand) && Poker.FLUSH.isFound(hand);
+		}
+	}, FOUR_OF_A_KIND("4 of a kind") {
+		@Override
+		public int getReward(int bet) {
+			return bet * 25;
+		}
+
+		@Override
+		public boolean isFound(Hand hand) {
+			return isNumCardsOver(hand, 4, 2);
+		}
+	}, FULL_HOUSE("Full house") {
+		@Override
+		public int getReward(int bet) {
+			return bet * 8;
+		}
+
+		@Override
+		public boolean isFound(Hand hand) {
+			return Poker.TWO_PAIR.isFound(hand) && Poker.THREE_OF_A_KIND.isFound(hand);
+		}
+	}, FLUSH("Flush") {
+		@Override
+		public int getReward(int bet) {
+			return bet * 6;
+		}
+
+		@Override
+		public boolean isFound(Hand hand) {
+			final List<Card> cards = hand.get();
+			Suit wantedSuit = hand.get().get(0).getSuit();
+			int series = 0;
+
+			for (Card c : cards) {
+				if (c.getSuit() == wantedSuit) {
+					series++;
+				}
+			}
+
+			return series == 5;
 		}
 	}, STRAIGHT("Straight") {
 		@Override
@@ -109,72 +132,60 @@ public enum Poker implements Payable, Rule {
 
 			return false;
 		}
-	}, FLUSH("Flush") {
+	}, THREE_OF_A_KIND("3 of a kind") {
 		@Override
 		public int getReward(int bet) {
-			return bet * 6;
+			return bet * 3;
+		}
+
+		@Override
+		public boolean isFound(Hand hand) {
+			return isNumCardsOver(hand, 3, 2);
+		}
+	}, TWO_PAIR("Two pair") {
+		@Override
+		public int getReward(int bet) {
+			return bet * 2;
 		}
 
 		@Override
 		public boolean isFound(Hand hand) {
 			final List<Card> cards = hand.get();
-			Suit wantedSuit = hand.get().get(0).getSuit();
-			int series = 0;
+
+			Collections.sort(cards);
+			int previousValue = -1;
+			int pairs = 0;
 
 			for (Card c : cards) {
-				if (c.getSuit() == wantedSuit) {
-					series++;
+				if (c.getValue() == previousValue) {
+					pairs++;
+					previousValue = -1;
+				} else {
+					previousValue = c.getValue();
 				}
 			}
 
-			return series == 5;
+			return pairs == 2;
 		}
-	}, FULL_HOUSE("Full house") {
+	}, JACKS_OR_BETTER("Jacks or better") {
 		@Override
 		public int getReward(int bet) {
-			return bet * 8;
+			return bet;
 		}
 
 		@Override
 		public boolean isFound(Hand hand) {
-			return Poker.TWO_PAIR.isFound(hand) && Poker.THREE_OF_A_KIND.isFound(hand);
+			return isNumCardsOver(hand, 2, Face.JACK.getValue());
 		}
-	}, FOUR_OF_A_KIND("4 of a kind") {
+	}, EMPTY_HAND("Empty hand") {
 		@Override
 		public int getReward(int bet) {
-			return bet * 25;
+			return 0;
 		}
 
 		@Override
 		public boolean isFound(Hand hand) {
-			return isNumCardsOver(hand, 4, 2);
-		}
-	}, STRAIGHT_FLUSH("Straight flush") {
-		@Override
-		public int getReward(int bet) {
-			return bet * 50;
-		}
-
-		@Override
-		public boolean isFound(Hand hand) {
-			return Poker.STRAIGHT.isFound(hand) && Poker.FLUSH.isFound(hand);
-		}
-	}, ROYAL_FLUSH("Royal flush") {
-		@Override
-		public int getReward(int bet) {
-			if (bet >= 50) {
-				return bet * 600;
-			}
-
-			return bet * 250;
-		}
-		@Override
-		public boolean isFound(Hand hand) {
-			final List<Card> cards = hand.get();
-		final Card lastCard = (Card) cards.get(cards.size() - 1);
-
-		Collections.sort(cards);
-		return lastCard.getValue() == Face.ACE.getValue() && Poker.STRAIGHT_FLUSH.isFound(hand);
+			return true;
 		}
 	};
 
